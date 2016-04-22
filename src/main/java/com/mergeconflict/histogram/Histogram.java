@@ -38,22 +38,6 @@ public final class Histogram {
         this.counts = new long[maxBins + 1];
     }
 
-    @Override public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Histogram {\n");
-        for (int bin = 0; bin < bins + 1; ++bin) {
-            if (bin != gap) {
-                sb.append("  ")
-                        .append(centroids[bin])
-                        .append(": ")
-                        .append(counts[bin])
-                        .append("\n");
-            }
-        }
-        sb.append("}");
-        return sb.toString();
-    }
-
     /**
      * Update this histogram with a new observation.
      * @param observation the new data point to be approximated in the histogram
@@ -139,7 +123,7 @@ public final class Histogram {
     public double[] query(double... quantiles) {
         double[] result = new double[quantiles.length];
         int lhs = -1;
-        long lhsTotal = 0, rhsTotal = 0;
+        double lhsTotal = 0, rhsTotal = 0;
 
         double lhsCentroid = Double.NaN, rhsCentroid = Double.NaN;
         long lhsCount = 0, rhsCount = 0;
@@ -180,13 +164,9 @@ public final class Histogram {
                     rhsCount = counts[rhs];
                 }
 
-                // determine the area of this bin, taking care to round down for
-                // the left-hand side and round up for the right-hand side, such
-                // that the total of all bin areas should equal the total count.
+                // determine the area of this bin ...
                 lhsTotal = rhsTotal;
-                rhsTotal += (long)
-                        (Math.floor(0.5d * lhsCount) +
-                         Math.ceil(0.5d * rhsCount));
+                rhsTotal += 0.5d * (lhsCount + rhsCount);
 
                 // update lhs for the next time through the loop. note that this
                 // variable shouldn't be used outside the loop, only the
